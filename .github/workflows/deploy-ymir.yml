@@ -1,0 +1,31 @@
+name: Deploy to a Ymir environment
+run-name: Deploy to Ymir environment 
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    env: 
+      GOLDEN_DB_HOST: dev.wp.syda.net
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.9.0
+        with:
+          php-version: '8.0'
+
+      - name: Install Ymir CLI
+        run: composer global require ymirapp/cli
+
+      - name: Deploy
+        run: |
+          ymir deploy ${{ inputs.ymir_env }}
+        env:
+          YMIR_API_TOKEN: ${{ secrets.YMIR_API_TOKEN }}
+        working-directory: 
+          ./bedrock
