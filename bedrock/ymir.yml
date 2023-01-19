@@ -1,22 +1,49 @@
-id: 538
-name: test-wordpress
+id: 220
+name: ymir-test
 type: bedrock
 environments:
-  production:
-    build:
-      - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
-    database:
-      server: ymir-test-prod-db-2
-      name: test-wordpress_production
-    deployment: image
-  staging:
+  prod:
+    php: 8.0
     cdn:
-      caching: assets
+      caching: enabled
+      cookies_whitelist:
+        - bid_1_password_protected_auth
+        - 'wp-settings-*'
+        - 'wordpress_*'
+        - woocommerce_cart_hash
+        - woocommerce_items_in_cart
+        - woocommerce_recently_viewed
+        - 'wp_woocommerce_session_*'
+      excluded_paths:
+        - /addons
+        - /cart
+        - /checkout
+        - /my-account
     cron: false
     warmup: false
-    build:
-      - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install'
-    database:
-      server: ymir-test-prod-db-2
-      name: test-wordpress_staging
+    gateway: false
+    database: ymir-test-prod-db-2
     deployment: image
+    domain: prod.ymir.syda.net
+    cache: ymir-prod-cache
+    build:
+      commands:
+        - 'rm -Rf web/wp/wp-content'
+        - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
+      include:
+        - web/app/plugins
+        - web/app/themes
+  staging:
+    php: 8.0
+    cdn:
+      caching: assets
+      cookies_whitelist:
+        - bid_1_password_protected_auth
+        - 'wp-settings-*'
+        - 'wordpress_*'
+    cron: false
+    warmup: false
+    database: ymir-test-staging-db
+    deployment: image
+    domain: staging.ymir.syda.net
+    concurrency: 10
